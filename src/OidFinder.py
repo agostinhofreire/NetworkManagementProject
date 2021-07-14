@@ -40,7 +40,6 @@ class OidFinder:
         except:
             varBind = []
             varBindTableRow = []
-
         for varBindTableRow in varBind:
             for name, _ in varBindTableRow:
                 oid_list.append(str(name))

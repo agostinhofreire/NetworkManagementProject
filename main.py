@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import json
 from datetime import datetime
 from kivymd.app import MDApp
 from kivymd.uix.menu import MDDropdownMenu
@@ -16,6 +17,7 @@ from src.OidFinder import OidFinder
 from src.SNMP import SNMP
 from kvfile import *
 import threading
+import src.trap_server as server_trap
 
 from kivy.core.window import Window
 Window.size = (900, 600)
@@ -37,7 +39,7 @@ class RedesApp(MDApp):
 
         self.oidFinder = OidFinder()
         self.snmp = SNMP()
-
+        self.server_listen = None
         self.theme_cls.theme_style = "Light"
         self.theme_cls.primary_palette = "Gray"
         self.theme_cls.primary_hue = "A700"
@@ -80,6 +82,7 @@ class RedesApp(MDApp):
 
     def button_reset_action(self):
         pass
+
         # self.root.ids.mainscreen.ids.ipaddress.text = ""
         # self.root.ids.mainscreen.ids.oiditems.clear_widgets()
 
@@ -102,10 +105,17 @@ OneLineAvatarIconListItem:
             self.root.ids.mainscreen.ids.oiditems.add_widget(listitem)
 
     def button_trap(self):
-        print("Esperando joao")
+        self.server_listen = []
+        self.server_listen = threading.Thread(target=server_trap.start_server)
+        self.server_listen.start()
+        th_wait = threading.Thread(target=server_trap.th_gambs2)
+        th_wait.start()
+        th_wait.join()
 
-        # response = self.trap_server()
-        # self.root.ids.mainscreen.ids.traptext.text = str(response)
+        retorno = server_trap.my_queue.get()
+        self.root.ids.mainscreen.ids.traptext.text = str(json.dumps(retorno,indent = 4))
+
+
 
 
     def show_data(self, text):
